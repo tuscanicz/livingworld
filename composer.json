@@ -14,7 +14,10 @@
   "require": {
     "php": ">=7.0",
     "symfony/console": "^3.2",
-    "kstefan/enum": "^1.0"
+    "kstefan/enum": "^1.0",
+    "symfony/yaml": "^3.2",
+    "symfony/dependency-injection": "^3.2",
+    "symfony/config": "^3.2"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0"

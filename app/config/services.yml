@@ -1,0 +1,57 @@
+services:
+
+    random.organism.type.getter:
+        class: LivingWorld\Generate\XmlFile\Structure\Organism\RandomOrganismTypeGetter
+
+    world.structure.generator:
+        class: LivingWorld\Generate\XmlFile\WorldStructureGenerator
+        arguments:
+            - '@random.organism.type.getter'
+
+    xml.file.getter:
+        class: LivingWorld\Generate\XmlFile\XmlFileGetter
+
+    xml.file.saver:
+        class: LivingWorld\Generate\XmlFile\XmlFileSaver
+        arguments:
+            - '%tmp.dir%'
+
+    xml.file.parser:
+        class: LivingWorld\Import\XmlFile\XmlFileParser
+        arguments:
+            - '%tmp.dir%'
+
+    organism.type.formatter:
+        class: LivingWorld\Graphics\OrganismTypeFormatter
+
+    organism.output.formatter:
+        class: LivingWorld\Graphics\OrganismOutputFormatter
+
+    screen.writer:
+        class: LivingWorld\Graphics\Screen\ScreenWriter
+        arguments:
+            - '@organism.type.formatter'
+
+    import.file.processor:
+        class: LivingWorld\Import\Processor\ImportFileProcessor
+
+    world.structure.getter:
+        class: LivingWorld\Import\XmlFile\Output\WorldStructureGetter
+
+    import.command:
+        class: LivingWorld\Import\ImportCommand
+        arguments:
+            - '@organism.output.formatter'
+            - '@xml.file.parser'
+            - '@import.file.processor'
+            - '@world.structure.getter'
+            - '@xml.file.getter'
+            - '@xml.file.saver'
+            - '@screen.writer'
+
+    generate.world.command:
+        class: LivingWorld\Generate\GenerateWorldCommand
+        arguments:
+            - '@world.structure.generator'
+            - '@xml.file.getter'
+            - '@xml.file.saver'
