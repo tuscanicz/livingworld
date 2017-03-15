@@ -32,19 +32,42 @@ class Frame
         $this->frameNumber = $frameNumber;
     }
 
-    public function isPositionEmpty($xPosition, $yPosition)
+    public function isPositionEmpty(int $xPosition, int $yPosition)
     {
         return $this->coordinates[$xPosition][$yPosition] === null;
     }
 
     /**
-     * @param $xPosition
-     * @param $yPosition
+     * @param int $xPosition
+     * @param int $yPosition
      * @return Organism
      */
-    public function getPosition($xPosition, $yPosition)
+    public function getPosition(int $xPosition, int $yPosition)
     {
         return $this->coordinates[$xPosition][$yPosition];
+    }
+
+    public function getNumberOfSameTypeNeighbours(int $xPosition, int $yPosition)
+    {
+        $deltas = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+        $count = 0;
+        foreach ($deltas as $delta) {
+            $xPositionOfNeighbour = $xPosition + $delta[0];
+            $yPositionOfNeighbour = $yPosition + $delta[1];
+            if (
+                $xPositionOfNeighbour < $this->getGrid()->getSize() &&
+                $xPositionOfNeighbour >= 0 &&
+                $yPositionOfNeighbour < $this->getGrid()->getSize() &&
+                $yPositionOfNeighbour >= 0
+            ) {
+                if ($this->isPositionEmpty($xPositionOfNeighbour, $yPositionOfNeighbour) === false) {
+                    // @todo: ressolve neighbours type and aggregate the results
+                    $count++;
+                }
+            }
+        }
+
+        return $count;
     }
 
     public function getGrid()
