@@ -32,28 +32,36 @@ class ImportFileProcessor
      */
     private function processLifeCycle(Frame $previousFrame)
     {
+        $organismTypes = OrganismTypeEnum::getValues();
         $survivingOrganisms = [];
         if ($previousFrame->hasOrganisms() === true) {
-            // @todo: refactor this mess
+            // @todo: refactor this mess: present resolver to avoid nested loops
             for ($x = 0; $x < $previousFrame->getGrid()->getSize(); $x++) {
                 for ($y = 0; $y < $previousFrame->getGrid()->getSize(); $y++) {
                     if ($previousFrame->isPositionEmpty($x, $y)) {
-                        $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y);
-                        $this->logger->logOperation('position empty', $x, $y, $numberOfNeighbours, $previousFrame);
-                        if ($numberOfNeighbours === 3) {
-                            // give a BIRTH
-                            // @todo: get type of the new organism
-                            $survivingOrganisms[] = new Organism($x, $y, OrganismTypeEnum::TYPE_HARKONNEN);
-                            $this->logger->logOperation('creating a new organism', $x, $y, $numberOfNeighbours, $previousFrame);
+                        $survivalCandidates = [];
+                        foreach ($organismTypes as $organismType) {
+                            $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y, $organismType);
+                            $this->logger->logOperation('position empty', $x, $y, $numberOfNeighbours, $previousFrame);
+                            if ($numberOfNeighbours === 3) {
+                                $survivalCandidates[] = new Organism($x, $y, $organismType);
+                                $this->logger->logOperation('creating a new organism', $x, $y, $numberOfNeighbours, $previousFrame);
+                            }
+                        }
+                        // @todo: refactor: delegate surviving logic
+                        if (count($survivalCandidates) > 0) {
+                            $survivingOrganisms[] = $survivalCandidates[random_int(0, count($survivalCandidates) - 1)];
                         }
                     } else {
-                        $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y);
-                        $this->logger->logOperation('neighbours found', $x, $y, $numberOfNeighbours, $previousFrame);
-                        if ($numberOfNeighbours >= 4 || $numberOfNeighbours < 2) {
-                            $this->logger->logOperation('dying organism', $x, $y, $numberOfNeighbours, $previousFrame);
-                        } else {
-                            $survivingOrganisms[] = clone $previousFrame->getPosition($x, $y);
-                            $this->logger->logOperation('a new clone', $x, $y, $numberOfNeighbours, $previousFrame);
+                        foreach ($organismTypes as $organismType) {
+                            $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y, $organismType);
+                            $this->logger->logOperation('neighbours found', $x, $y, $numberOfNeighbours, $previousFrame);
+                            if ($numberOfNeighbours >= 4 || $numberOfNeighbours < 2) {
+                                $this->logger->logOperation('dying organism', $x, $y, $numberOfNeighbours, $previousFrame);
+                            } else {
+                                $survivingOrganisms[] = clone $previousFrame->getPosition($x, $y);
+                                $this->logger->logOperation('a new clone', $x, $y, $numberOfNeighbours, $previousFrame);
+                            }
                         }
                     }
                 }

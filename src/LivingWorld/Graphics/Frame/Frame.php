@@ -47,13 +47,14 @@ class Frame
         return $this->coordinates[$xPosition][$yPosition];
     }
 
-    public function getNumberOfSameTypeNeighbours(int $xPosition, int $yPosition)
+    public function getNumberOfSameTypeNeighbours(int $xPosition, int $yPosition, string $organismType)
     {
         $deltas = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]];
         $count = 0;
         foreach ($deltas as $delta) {
             $xPositionOfNeighbour = $xPosition + $delta[0];
             $yPositionOfNeighbour = $yPosition + $delta[1];
+            // @todo: refactor these long and complicated conditionals
             if (
                 $xPositionOfNeighbour < $this->getGrid()->getSize() &&
                 $xPositionOfNeighbour >= 0 &&
@@ -61,8 +62,9 @@ class Frame
                 $yPositionOfNeighbour >= 0
             ) {
                 if ($this->isPositionEmpty($xPositionOfNeighbour, $yPositionOfNeighbour) === false) {
-                    // @todo: ressolve neighbours type and aggregate the results
-                    $count++;
+                    if ($organismType === $this->getPosition($xPositionOfNeighbour, $yPositionOfNeighbour)->getType()) {
+                        $count++;
+                    }
                 }
             }
         }
