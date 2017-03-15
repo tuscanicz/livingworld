@@ -1,0 +1,25 @@
+{
+  "name": "tuscanicz/livingworld",
+  "type": "library",
+  "description": "A simple PHP implementation of Conway's game of life.",
+  "keywords": ["php", "game", "life"],
+  "homepage": "https://github.com/tuscanicz/livingworld",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Petr Bechyne",
+      "email": "mail@petrbechyne.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "symfony/console": "^3.2",
+    "kstefan/enum": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.0"
+  },
+  "autoload": {
+    "psr-4": {"LivingWorld\\": "src/LivingWorld"}
+  }
+}
