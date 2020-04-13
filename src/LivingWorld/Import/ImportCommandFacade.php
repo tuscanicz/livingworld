@@ -33,7 +33,7 @@ class ImportCommandFacade
 
     public function getProcessedFrames(Frame $frame): FrameList
     {
-        $frames = [];
+        $frames = [$frame];
         do {
             $frame = $this->importFileProcessor->processFrame($frame);
             $frames[] = $frame;
