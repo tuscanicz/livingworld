@@ -1,23 +1,20 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Generate\XmlFile\Structure;
 
-use LivingWorld\Generate\XmlFile\Structure\Organism\Organism;
+use LivingWorld\Generate\XmlFile\Structure\Organism\OrganismList;
 
 class WorldStructure
 {
-    private $numberOfCells;
-    private $numberOfSpecies;
-    private $numberOfIterations;
-    private $organisms;
 
-    /**
-     * @param int $numberOfCells
-     * @param int $numberOfSpecies
-     * @param int $numberOfIterations
-     * @param Organism[] $organisms
-     */
-    public function __construct(int $numberOfCells, int $numberOfSpecies, int $numberOfIterations, array $organisms)
+    private int $numberOfCells;
+    private int $numberOfSpecies;
+    private int $numberOfIterations;
+    private OrganismList $organisms;
+
+    public function __construct(int $numberOfCells, int $numberOfSpecies, int $numberOfIterations, OrganismList $organisms)
     {
         $this->numberOfCells = $numberOfCells;
         $this->numberOfSpecies = $numberOfSpecies;
@@ -25,23 +22,24 @@ class WorldStructure
         $this->organisms = $organisms;
     }
 
-    public function getNumberOfCells()
+    public function getNumberOfCells(): int
     {
         return $this->numberOfCells;
     }
 
-    public function getNumberOfSpecies()
+    public function getNumberOfSpecies(): int
     {
         return $this->numberOfSpecies;
     }
 
-    public function getNumberOfIterations()
+    public function getNumberOfIterations(): int
     {
         return $this->numberOfIterations;
     }
 
-    public function getOrganisms()
+    public function getOrganisms(): OrganismList
     {
         return $this->organisms;
     }
+
 }

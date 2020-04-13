@@ -1,22 +1,31 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Import\Processor;
 
-use LivingWorld\Entity\Organism;
-use LivingWorld\Enum\OrganismTypeEnum;
+use LivingWorld\Entity\OrganismList;
 use LivingWorld\Graphics\Frame\Frame;
+use LivingWorld\Import\Processor\LifeCycle\Exception\OrganismWillDieException;
+use LivingWorld\Import\Processor\LifeCycle\LifeCycleProcessorInterface;
+use LivingWorld\Import\Processor\LifeCycle\Resolve\LifeCycleProcessorResolver;
 use LivingWorld\Logger\ImportProcessorLogger;
 
 class ImportFileProcessor
 {
-    private $logger;
 
-    public function __construct(ImportProcessorLogger $logger)
-    {
+    private LifeCycleProcessorResolver $lifeCycleProcessorResolver;
+    private ImportProcessorLogger $logger;
+
+    public function __construct(
+        LifeCycleProcessorResolver $lifeCycleProcessorResolver,
+        ImportProcessorLogger $logger
+    ) {
+        $this->lifeCycleProcessorResolver = $lifeCycleProcessorResolver;
         $this->logger = $logger;
     }
 
-    public function process(Frame $frame)
+    public function processFrame(Frame $frame): Frame
     {
         return new Frame(
             $frame->getGrid(),
@@ -26,48 +35,41 @@ class ImportFileProcessor
         );
     }
 
-    /**
-     * @param Frame $previousFrame
-     * @return Organism[]
-     */
-    private function processLifeCycle(Frame $previousFrame)
+    private function processLifeCycle(Frame $frame): OrganismList
     {
-        $organismTypes = OrganismTypeEnum::getValues();
-        $survivingOrganisms = [];
-        if ($previousFrame->hasOrganisms() === true) {
-            // @todo: refactor this mess: present resolver to avoid nested loops
-            for ($x = 0; $x < $previousFrame->getGrid()->getSize(); $x++) {
-                for ($y = 0; $y < $previousFrame->getGrid()->getSize(); $y++) {
-                    if ($previousFrame->isPositionEmpty($x, $y)) {
-                        $survivalCandidates = [];
-                        foreach ($organismTypes as $organismType) {
-                            $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y, $organismType);
-                            $this->logger->logOperation('position empty', $x, $y, $numberOfNeighbours, $previousFrame);
-                            if ($numberOfNeighbours === 3) {
-                                $survivalCandidates[] = new Organism($x, $y, $organismType);
-                                $this->logger->logOperation('creating a new organism', $x, $y, $numberOfNeighbours, $previousFrame);
-                            }
-                        }
-                        // @todo: refactor: delegate surviving logic
-                        if (count($survivalCandidates) > 0) {
-                            $survivingOrganisms[] = $survivalCandidates[random_int(0, count($survivalCandidates) - 1)];
-                        }
-                    } else {
-                        foreach ($organismTypes as $organismType) {
-                            $numberOfNeighbours = $previousFrame->getNumberOfSameTypeNeighbours($x, $y, $organismType);
-                            $this->logger->logOperation('neighbours found', $x, $y, $numberOfNeighbours, $previousFrame);
-                            if ($numberOfNeighbours >= 4 || $numberOfNeighbours < 2) {
-                                $this->logger->logOperation('dying organism', $x, $y, $numberOfNeighbours, $previousFrame);
-                            } else {
-                                $survivingOrganisms[] = clone $previousFrame->getPosition($x, $y);
-                                $this->logger->logOperation('a new clone', $x, $y, $numberOfNeighbours, $previousFrame);
-                            }
-                        }
-                    }
+        $survivingOrganisms = new OrganismList([]);
+        if ($frame->getOrganisms()->hasOrganisms() === true) {
+            for ($x = 0; $x < $frame->getGrid()->getSize(); $x++) {
+                for ($y = 0; $y < $frame->getGrid()->getSize(); $y++) {
+                    $lifeCycleProcessor = $this->lifeCycleProcessorResolver->resolveProcessorByPositionStatus($frame, $x, $y);
+                    $survivingOrganisms = $this->getSurvivingOrganism($survivingOrganisms, $lifeCycleProcessor, $frame, $x, $y);
                 }
             }
         }
 
         return $survivingOrganisms;
     }
+
+    private function getSurvivingOrganism(
+        OrganismList $survivingOrganismsList,
+        LifeCycleProcessorInterface $lifeCycleProcessor,
+        Frame $frame,
+        int $x,
+        int $y
+    ): OrganismList {
+        $survivingOrganisms = $survivingOrganismsList->getOrganisms();
+        try {
+            $survivalCandidateOrganisms = $lifeCycleProcessor->getOrganismsForPosition($frame, $x, $y);
+            if ($survivalCandidateOrganisms->hasOrganisms() === true) {
+                $winningCandidateOrganism = $survivalCandidateOrganisms->getRandomOrganism();
+                $this->logger->logBirthOperation('creating a new organism', $x, $y, $frame, $winningCandidateOrganism->getType());
+                $survivingOrganisms[] = $winningCandidateOrganism;
+            }
+        } catch (OrganismWillDieException $e) {
+            $this->logger->logDieOperation('dying organism', $x, $y, $e->getNumberOfNeighbours(), $frame, $e->getOrganismType());
+        }
+
+        return new OrganismList($survivingOrganisms);
+    }
+
 }

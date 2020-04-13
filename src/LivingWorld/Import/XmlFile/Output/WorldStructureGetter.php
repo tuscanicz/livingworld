@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Import\XmlFile\Output;
 
 use LivingWorld\Generate\XmlFile\Structure\Organism\Organism;
+use LivingWorld\Generate\XmlFile\Structure\Organism\OrganismList;
 use LivingWorld\Generate\XmlFile\Structure\WorldStructure;
 use LivingWorld\Graphics\Frame\Frame;
 
 class WorldStructureGetter
 {
-    public function getWordStructureFromFrame(Frame $frame)
+
+    public function getWordStructureFromFrame(Frame $frame): WorldStructure
     {
         $organisms = [];
-        if ($frame->hasOrganisms() === true) {
-            foreach ($frame->getOrganisms() as $organism) {
+        if ($frame->getOrganisms()->hasOrganisms() === true) {
+            foreach ($frame->getOrganisms()->getOrganisms() as $organism) {
                 $organisms[] = new Organism(
                     $organism->getXPosition(),
                     $organism->getYPosition(),
@@ -23,9 +27,10 @@ class WorldStructureGetter
 
         return new WorldStructure(
             $frame->getGrid()->getSize(),
-            $frame->getOrganismsCount(),
+            $frame->getOrganisms()->getOrganismsCount(),
             $frame->getFrameNumber(),
-            $organisms
+            new OrganismList($organisms)
         );
     }
+
 }

@@ -1,26 +1,27 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Graphics;
 
 use Exception;
 use LivingWorld\Enum\OrganismTypeEnum;
+use LivingWorld\Graphics\Format\OrganismSignEnum;
 
 class OrganismTypeFormatter
 {
-    const ORGANISM_DEFAULT_SIGN = 'X';
 
-    public function formatOutput(string $string, string $format)
+    public function formatOutput(OrganismSignEnum $sign, string $format): string
     {
         if (OrganismTypeEnum::hasValue($format) === true) {
 
-            return $this->format($string, $format);
-
-        } else {
-             throw new Exception('Unresolved output format: '.$format);
+            return $this->format($sign->getValue(), $format);
         }
+
+        throw new Exception('Unresolved output format: '.$format);
     }
 
-    private function format(string $string, string $format)
+    private function format(string $string, string $format): string
     {
         return sprintf(
             '<%s>%s</%s>',
@@ -29,4 +30,5 @@ class OrganismTypeFormatter
             $format
         );
     }
+
 }

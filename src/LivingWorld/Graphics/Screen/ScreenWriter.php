@@ -1,69 +1,56 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Graphics\Screen;
 
 use LivingWorld\Graphics\Frame\Frame;
-use LivingWorld\Graphics\OrganismTypeFormatter;
+use LivingWorld\Graphics\Frame\FrameList;
+use LivingWorld\Graphics\Screen\Position\PositionContentGetter;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ScreenWriter
 {
-    const SLOW_MOTION_FPS = 2;
-    const DEFAULT_FPS = 4;
-    const REALISTIC_FPS = 24;
 
-    private $organismTypeFormatter;
+    private PositionContentGetter $positionContentGetter;
 
     public function __construct(
-        OrganismTypeFormatter $organismTypeFormatter
+        PositionContentGetter $positionContentGetter
     ) {
-        $this->organismTypeFormatter = $organismTypeFormatter;
+        $this->positionContentGetter = $positionContentGetter;
     }
 
-    /**
-     * @param Frame[] $frames
-     * @param OutputInterface $output
-     * @param int $fps
-     */
-    public function writeScreen(array $frames, OutputInterface $output, int $fps = self::DEFAULT_FPS)
+    public function writeScreen(FrameList $frameList, OutputInterface $output, FramePerSecondsEnum $fps): void
     {
-        foreach ($frames as $frame) {
-            system('clear');
-            $this->writeFrameNumber($frame, $output);
-            $this->writeFrameContents($frame, $output);
-            usleep(1000000 / $fps);
+        if ($frameList->hasFrames() === true) {
+            foreach ($frameList->getFrames() as $frame) {
+                system('clear');
+                $this->writeFrameNumber($frame, $output);
+                $this->writeFrameContents($frame, $output);
+                usleep(1000000 / $fps->getValue());
+            }
+
+            return;
         }
+
+        throw new \InvalidArgumentException('Could not write screen: no frames given');
     }
 
-    private function writeFrameContents(Frame $frame, OutputInterface $output)
+    private function writeFrameContents(Frame $frame, OutputInterface $output): void
     {
         for ($x = 0; $x < $frame->getGrid()->getSize(); $x++) {
             for ($y = 0; $y < $frame->getGrid()->getSize(); $y++) {
-                $output->write($this->getPositionContent($frame, $x, $y));
+                $output->write(
+                    $this->positionContentGetter->getPositionContent($frame, $x, $y)
+                );
             }
             $output->writeln('');
         }
     }
 
-
-    private function writeFrameNumber(Frame $frame, OutputInterface $output)
+    private function writeFrameNumber(Frame $frame, OutputInterface $output): void
     {
         $output->writeln('#'.(string)$frame->getFrameNumber());
     }
 
-    private function getPositionContent(Frame $frame, int $x, int $y): string
-    {
-        if ($frame->isPositionEmpty($x, $y) === false) {
-            $organism = $frame->getPosition($x, $y);
-
-            return $this->organismTypeFormatter->formatOutput(
-                OrganismTypeFormatter::ORGANISM_DEFAULT_SIGN,
-                $organism->getType()
-            );
-
-        } else {
-
-            return ' ';
-        }
-    }
 }

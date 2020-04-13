@@ -1,31 +1,36 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace LivingWorld\Generate\XmlFile;
 
+use Consistence\Type\ArrayType\ArrayType;
 use LivingWorld\Generate\XmlFile\Structure\Organism\Organism;
+use LivingWorld\Generate\XmlFile\Structure\Organism\OrganismList;
 use LivingWorld\Generate\XmlFile\Structure\Organism\RandomOrganismTypeGetter;
 use LivingWorld\Generate\XmlFile\Structure\WorldStructure;
 
 class WorldStructureGenerator
 {
-    private $randomOrganismTypeGetter;
+
+    private RandomOrganismTypeGetter $randomOrganismTypeGetter;
 
     public function __construct(RandomOrganismTypeGetter $randomOrganismTypeGetter)
     {
         $this->randomOrganismTypeGetter = $randomOrganismTypeGetter;
     }
 
-    public function generateWorldStructure(int $numberOfCells, int $numberOfSpecies, int $numberOfIterations)
+    public function generateWorldStructure(int $numberOfCells, int $numberOfSpecies, int $numberOfIterations): WorldStructure
     {
-        $organisms = [];
+        $organisms = new OrganismList([]);
         $filledCoordinates = [];
         do {
             $newOrganism = $this->generateRandomOrganism($numberOfCells - 1);
-            if (in_array($newOrganism->getPositionId(), $filledCoordinates, true) === false) {
-                $organisms[] = $newOrganism;
+            if (ArrayType::containsValue($filledCoordinates, $newOrganism->getPositionId()) === false) {
+                $organisms = $organisms->addOrganism($newOrganism);
                 $filledCoordinates[] = $newOrganism->getPositionId();
             }
-        } while (count($organisms) < $numberOfSpecies);
+        } while ($organisms->getOrganismsCount() < $numberOfSpecies);
 
         return new WorldStructure(
             $numberOfCells,
@@ -35,12 +40,17 @@ class WorldStructureGenerator
         );
     }
 
-    private function generateRandomOrganism($maxCellIndex)
+    private function generateRandomOrganism(int $maxCellIndex): Organism
     {
-        return new Organism(
-            random_int(0, $maxCellIndex),
-            random_int(0, $maxCellIndex),
-            $this->randomOrganismTypeGetter->getRandomOrganism()
-        );
+        if ($maxCellIndex >= 0) {
+            return new Organism(
+                random_int(0, $maxCellIndex),
+                random_int(0, $maxCellIndex),
+                $this->randomOrganismTypeGetter->getRandomOrganismType()
+            );
+        }
+
+        throw new \InvalidArgumentException('Could not generate ');
     }
+
 }
