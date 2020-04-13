@@ -31,9 +31,18 @@
   "scripts": {
     "phpcs": "phpcs --standard=codesniffer-ruleset.xml --parallel=8 --extensions=php --encoding=utf-8 --tab-width=4 -sp src tests",
     "phpcbf": "phpcbf --standard=codesniffer-ruleset.xml --parallel=8 --extensions=php --encoding=utf-8 --tab-width=4 -sp src tests",
-    "phpstan": "php vendor/phpstan/phpstan/phpstan.phar analyse -c phpstan.neon src tests --level 7 --no-progress"
+    "phpstan": "php vendor/phpstan/phpstan/phpstan.phar analyse -c phpstan.neon src tests --level 7 --no-progress",
+    "phpunit": "php vendor/phpunit/phpunit/phpunit --testsuite=unit",
+    "ci": [
+      "@phpcs",
+      "@phpstan",
+      "@phpunit"
+    ]
   },
   "autoload": {
     "psr-4": {"LivingWorld\\": "src/LivingWorld"}
+  },
+  "autoload-dev": {
+    "psr-4": {"LivingWorld\\":  "tests/"}
   }
 }
