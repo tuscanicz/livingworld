@@ -1,10 +1,13 @@
 # Conway's Game of life PHP implementation
 
-A simple test application using Symfony 3.x components and using PHP 7.x features.
+This application is an example of php implementation of well known game using some Symfony 5.x components and PHP 7.4.x features.
+
+I am using dependency injection, immutable value objects and producing readable and unit testable code.
+The first version was written few years as a test and is still maintained in order to present my PHP skills.
 
 ## How to use
 
-First, generate a new world into a xml file in order to have something to process.
+First, generate a new world into a xml file in order to create initial state.
 Then run the data import that will draw the life on the screen and save the 
 last frame into another xml file.
 
