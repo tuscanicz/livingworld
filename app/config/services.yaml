@@ -1,0 +1,37 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    LivingWorld\:
+        resource: '../../src/**/*.php'
+        exclude: '../../src/**/{*Command.php,*Controller.php}'
+
+    Monolog\Handler\RotatingFileHandler:
+        arguments:
+            - '%tmp.dir%/logger.log'
+
+    Monolog\Logger:
+        arguments:
+            - 'default'
+            - ['@Monolog\Handler\RotatingFileHandler']
+
+    LivingWorld\Logger\ImportProcessorLogger:
+        arguments:
+            - '@Monolog\Logger'
+
+    LivingWorld\File\FileWriter:
+        arguments:
+            - '%tmp.dir%'
+
+    LivingWorld\Import\XmlFile\XmlFileParser:
+        arguments:
+            - '%tmp.dir%'
+
+    LivingWorld\Import\Processor\LifeCycle\BirthProcessor:
+        tags:
+            - 'lifecycle.processor'
+
+    LivingWorld\Import\Processor\LifeCycle\DieOrSurviveProcessor:
+        tags:
+            - 'lifecycle.processor'

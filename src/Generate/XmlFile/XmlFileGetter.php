@@ -7,11 +7,19 @@ namespace LivingWorld\Generate\XmlFile;
 use DOMDocument;
 use DOMElement;
 use LivingWorld\Enum\XmlFileElementEnum;
+use LivingWorld\Generate\XmlFile\Dom\DomElementFactory;
 use LivingWorld\Generate\XmlFile\Structure\Organism\OrganismList;
 use LivingWorld\Generate\XmlFile\Structure\WorldStructure;
 
 class XmlFileGetter
 {
+
+    private DomElementFactory $domElementFactory;
+
+    public function __construct(DomElementFactory $domElementFactory)
+    {
+        $this->domElementFactory = $domElementFactory;
+    }
 
     public function getXmlFile(WorldStructure $worldStructure): string
     {
@@ -19,21 +27,21 @@ class XmlFileGetter
 
         $world = $document->createElement(XmlFileElementEnum::WORLD_ELEMENT);
         $world->appendChild(
-            $this->getXmlElementWithNumericValue(
+            $this->domElementFactory->getXmlElementWithNumericValue(
                 $document,
                 new XmlFileElementEnum(XmlFileElementEnum::WORLD_CELLS_ELEMENT),
                 $worldStructure->getNumberOfCells()
             )
         );
         $world->appendChild(
-            $this->getXmlElementWithNumericValue(
+            $this->domElementFactory->getXmlElementWithNumericValue(
                 $document,
                 new XmlFileElementEnum(XmlFileElementEnum::WORLD_SPECIES_ELEMENT),
                 $worldStructure->getNumberOfSpecies()
             )
         );
         $world->appendChild(
-            $this->getXmlElementWithNumericValue(
+            $this->domElementFactory->getXmlElementWithNumericValue(
                 $document,
                 new XmlFileElementEnum(XmlFileElementEnum::WORLD_ITERATIONS_ELEMENT),
                 $worldStructure->getNumberOfIterations()
@@ -55,16 +63,6 @@ class XmlFileGetter
         return $documentXmlContents;
     }
 
-    private function getXmlElementWithNumericValue(DOMDocument $document, XmlFileElementEnum $element, int $numericValue): DOMElement
-    {
-        return $this->getXmlElementWithStringValue($document, $element, (string) $numericValue);
-    }
-
-    private function getXmlElementWithStringValue(DOMDocument $document, XmlFileElementEnum $element, string $numericValue): DOMElement
-    {
-        return $document->createElement($element->getValue(), $numericValue);
-    }
-
     private function getOrganismsElement(DOMDocument $document, OrganismList $organisms): DOMElement
     {
         $organismsElement = $document->createElement(XmlFileElementEnum::ORGANISMS_ELEMENT);
@@ -72,21 +70,21 @@ class XmlFileGetter
             foreach ($organisms->getOrganisms() as $organism) {
                 $organismElement = $document->createElement(XmlFileElementEnum::ORGANISM_ELEMENT);
                 $organismElement->appendChild(
-                    $this->getXmlElementWithNumericValue(
+                    $this->domElementFactory->getXmlElementWithNumericValue(
                         $document,
                         new XmlFileElementEnum(XmlFileElementEnum::ORGANISM_X_POSITION_ELEMENT),
                         $organism->getXPosition()
                     )
                 );
                 $organismElement->appendChild(
-                    $this->getXmlElementWithNumericValue(
+                    $this->domElementFactory->getXmlElementWithNumericValue(
                         $document,
                         new XmlFileElementEnum(XmlFileElementEnum::ORGANISM_Y_POSITION_ELEMENT),
                         $organism->getYPosition()
                     )
                 );
                 $organismElement->appendChild(
-                    $this->getXmlElementWithStringValue(
+                    $this->domElementFactory->getXmlElementWithStringValue(
                         $document,
                         new XmlFileElementEnum(XmlFileElementEnum::ORGANISM_TYPE_ELEMENT),
                         $organism->getType()->getValue()

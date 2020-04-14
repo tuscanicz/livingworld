@@ -50,7 +50,7 @@ class WorldStructureGenerator
             );
         }
 
-        throw new \InvalidArgumentException('Could not generate ');
+        throw new \InvalidArgumentException('Could not generate Organism outside of the scope');
     }
 
 }

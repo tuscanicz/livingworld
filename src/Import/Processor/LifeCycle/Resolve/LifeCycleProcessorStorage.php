@@ -15,9 +15,14 @@ class LifeCycleProcessorStorage
     /**
      * @param LifeCycleProcessorInterface[] $lifeCycleProcessors
      */
-    public function __construct(array $lifeCycleProcessors)
+    public function __construct(array $lifeCycleProcessors = [])
     {
         $this->lifeCycleProcessors = $lifeCycleProcessors;
+    }
+
+    public function addLifeCycleProcessor(LifeCycleProcessorInterface $lifeCycleProcessor): void
+    {
+        $this->lifeCycleProcessors[] = $lifeCycleProcessor;
     }
 
     /**

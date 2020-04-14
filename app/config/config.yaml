@@ -1,0 +1,6 @@
+imports:
+  - { resource: commands.yaml }
+  - { resource: services.yaml }
+
+parameters:
+    tmp.dir:  'tmp'
