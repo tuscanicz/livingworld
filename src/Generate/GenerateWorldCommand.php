@@ -55,11 +55,13 @@ class GenerateWorldCommand extends Command
         $numberOfIterations = $this->commandArgumentGetter->getIntegerArgument($input, 'iterationsCount');
         $this->validateInput($numberOfCells, $numberOfSpecies, $numberOfIterations);
 
-        $output->writeln('Start generating into target file: '.$targetFile);
+        $output->writeln('Start generating world into target file: '.$targetFile);
         $worldStructure = $this->worldStructureGenerator->generateWorldStructure($numberOfCells, $numberOfSpecies, $numberOfIterations);
         $xmlFileContents = $this->xmlFileGetter->getXmlFile($worldStructure);
 
         $this->fileWriter->writeFile($targetFile, $xmlFileContents);
+        
+        $output->writeln('World generated successfully.');
 
         return CommandResultEnum::RESULT_SUCCESS;
     }
